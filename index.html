@@ -16,6 +16,13 @@
             font-family: Arial, sans-serif;
         }
 
+        #container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            row-gap: 6rem;
+        }
+
         .cube-container {
             width: 300px;
             height: 300px;
@@ -54,6 +61,35 @@
         .top    { transform: rotateX(90deg) translateZ(150px); }
         .bottom { transform: rotateX(-90deg) translateZ(150px); }
 
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+            color: white;
+        }
+
+        .face-buttons {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            grid-gap: 10px;
+            justify-items: center;
+        }
+
+        .controls button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #444;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+            width: 100%; /* Ensure consistent button sizing */
+        }
+
+        .controls button:hover {
+            background-color: #666;
+        }
+
         .instructions {
             position: absolute;
             top: 20px;
@@ -72,14 +108,33 @@
     </style>
 </head>
 <body>
-    <div class="cube-container">
-        <div class="cube">
-            <div class="face front"></div>
-            <div class="face back"></div>
-            <div class="face left"></div>
-            <div class="face right"></div>
-            <div class="face top"></div>
-            <div class="face bottom"></div>
+    <div id="container">
+        <div class="cube-container">
+            <div class="cube">
+                <div class="face front"></div>
+                <div class="face back"></div>
+                <div class="face left"></div>
+                <div class="face right"></div>
+                <div class="face top"></div>
+                <div class="face bottom"></div>
+            </div>
+        </div>
+        <div class="controls">
+            <h3>Face Rotations</h3>
+            <div class="face-buttons">
+                <button data-face="F">F</button>
+                <button data-face="B">B</button>
+                <button data-face="L">L</button>
+                <button data-face="R">R</button>
+                <button data-face="U">U</button>
+                <button data-face="D">D</button>
+                <button data-face="Shift+F">F'</button>
+                <button data-face="Shift+B">B'</button>
+                <button data-face="Shift+L">L'</button>
+                <button data-face="Shift+R">R'</button>
+                <button data-face="Shift+U">U'</button>
+                <button data-face="Shift+D">D'</button>
+            </div>
         </div>
     </div>
     <div class="instructions">
@@ -172,6 +227,27 @@
 
             if (moves[key]) {
                 moves[key]();
+            }
+        });
+
+        document.querySelector('.face-buttons').addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                const faceKey = e.target.getAttribute('data-face');
+                const isCounterClockwise = faceKey.includes('Shift+');
+                const face = faceKey.replace('Shift+', '');
+
+                const moves = {
+                    'F': () => rotateFace(currentFront, isCounterClockwise),
+                    'B': () => rotateFace(getOppositeFace(currentFront), isCounterClockwise),
+                    'L': () => rotateFace(getLeftFace(currentFront), isCounterClockwise),
+                    'R': () => rotateFace(getRightFace(currentFront), isCounterClockwise),
+                    'U': () => rotateFace(currentTop, isCounterClockwise),
+                    'D': () => rotateFace(getOppositeFace(currentTop), isCounterClockwise),
+                };
+
+                if (moves[face]) {
+                    moves[face]();
+                }
             }
         });
 
