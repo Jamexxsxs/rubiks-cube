@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3x3 Rubik's Cube</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            perspective: 1000px;
+            background: #282c34;
+            font-family: Arial, sans-serif;
+        }
+
+        .cube-container {
+            width: 300px;
+            height: 300px;
+            position: relative;
+        }
+
+        .cube {
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transform: rotateX(-30deg) rotateY(-45deg);
+            transition: transform 0.5s;
+        }
+
+        .face {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            transform-origin: center;
+        }
+
+        .face div {
+            width: 100px;
+            height: 100px;
+            border: 1px solid #000;
+            box-sizing: border-box;
+        }
+
+        .front  { transform: translateZ(150px); }
+        .back   { transform: rotateY(180deg) translateZ(150px); }
+        .left   { transform: rotateY(-90deg) translateZ(150px); }
+        .right  { transform: rotateY(90deg) translateZ(150px); }
+        .top    { transform: rotateX(90deg) translateZ(150px); }
+        .bottom { transform: rotateX(-90deg) translateZ(150px); }
+
+        .instructions {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="cube-container">
+        <div class="cube">
+            <div class="face front"></div>
+            <div class="face back"></div>
+            <div class="face left"></div>
+            <div class="face right"></div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+        </div>
+    </div>
+    <div class="instructions">
+        <p>Created By: Jamexxsxs</p>
+        <h3>Controls:</h3>
+        <p>F: Front face clockwise</p>
+        <p>B: Back face clockwise</p>
+        <p>L: Left face clockwise</p>
+        <p>R: Right face clockwise</p>
+        <p>U: Upper face clockwise</p>
+        <p>D: Down face clockwise</p>
+        <p>Hold Shift for counterclockwise</p>
+        <p>Arrow keys to rotate the entire cube</p>
+    </div>
+    <script>
+        const cube = document.querySelector('.cube');
+        const faces = ['front', 'back', 'left', 'right', 'top', 'bottom'];
+        const colors = ['red', 'orange', 'green', 'blue', 'white', 'yellow'];
+        let rotateX = -30;
+        let rotateY = -45;
+        let currentFront = 'front';
+        let currentTop = 'top';
+
+        // Initialize the cube
+        faces.forEach((face, index) => {
+            const faceElement = document.querySelector(`.${face}`);
+            for (let i = 0; i < 9; i++) {
+                const div = document.createElement('div');
+                div.style.background = colors[index];
+                faceElement.appendChild(div);
+            }
+        });
+
+        // Rotate the entire cube
+        document.addEventListener('keydown', (e) => {
+            switch (e.key) {
+                case 'ArrowUp':
+                    rotateX -= 15;
+                    break;
+                case 'ArrowDown':
+                    rotateX += 15;
+                    break;
+                case 'ArrowLeft':
+                    rotateY -= 15;
+                    break;
+                case 'ArrowRight':
+                    rotateY += 15;
+                    break;
+            }
+            cube.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            updateCurrentOrientation();
+        });
+
+        function updateCurrentOrientation() {
+            const normalizedX = ((rotateX % 360) + 360) % 360;
+            const normalizedY = ((rotateY % 360) + 360) % 360;
+
+            if (normalizedX > 45 && normalizedX <= 135) {
+                currentTop = 'back';
+            } else if (normalizedX > 225 && normalizedX <= 315) {
+                currentTop = 'front';
+            } else if (normalizedX <= 45 || normalizedX > 315) {
+                currentTop = 'top';
+            } else {
+                currentTop = 'bottom';
+            }
+
+            if (normalizedY > 45 && normalizedY <= 135) {
+                currentFront = 'left';
+            } else if (normalizedY > 225 && normalizedY <= 315) {
+                currentFront = 'right';
+            } else if (normalizedY > 135 && normalizedY <= 225) {
+                currentFront = 'back';
+            } else {
+                currentFront = 'front';
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            const key = e.key.toUpperCase();
+            const isCounterClockwise = e.shiftKey;
+            const moves = {
+                'F': () => rotateFace(currentFront, isCounterClockwise),
+                'B': () => rotateFace(getOppositeFace(currentFront), isCounterClockwise),
+                'L': () => rotateFace(getLeftFace(currentFront), isCounterClockwise),
+                'R': () => rotateFace(getRightFace(currentFront), isCounterClockwise),
+                'U': () => rotateFace(currentTop, isCounterClockwise),
+                'D': () => rotateFace(getOppositeFace(currentTop), isCounterClockwise)
+            };
+
+            if (moves[key]) {
+                moves[key]();
+            }
+        });
+
+        function getOppositeFace(face) {
+            const opposites = { 'front': 'back', 'back': 'front', 'left': 'right', 'right': 'left', 'top': 'bottom', 'bottom': 'top' };
+            return opposites[face];
+        }
+
+        function getLeftFace(front) {
+            const leftFaces = { 'front': 'left', 'back': 'right', 'left': 'back', 'right': 'front', 'top': 'left', 'bottom': 'left' };
+            return leftFaces[front];
+        }
+
+        function getRightFace(front) {
+            const rightFaces = { 'front': 'right', 'back': 'left', 'left': 'front', 'right': 'back', 'top': 'right', 'bottom': 'right' };
+            return rightFaces[front];
+        }
+
+        function rotateFace(face, isCounterClockwise) {
+            const faceElement = document.querySelector(`.${face}`);
+            const colors = Array.from(faceElement.children).map(child => child.style.background);
+
+            if (isCounterClockwise) {
+                [colors[0], colors[1], colors[2], colors[5], colors[8], colors[7], colors[6], colors[3]] =
+                [colors[2], colors[5], colors[8], colors[7], colors[6], colors[3], colors[0], colors[1]];
+            } else {
+                [colors[0], colors[1], colors[2], colors[5], colors[8], colors[7], colors[6], colors[3]] =
+                [colors[6], colors[3], colors[0], colors[1], colors[2], colors[5], colors[8], colors[7]];
+            }
+
+            Array.from(faceElement.children).forEach((child, index) => {
+                child.style.background = colors[index];
+            });
+
+            rotateAdjacentFaces(face, isCounterClockwise);
+        }
+
+        function rotateAdjacentFaces(face, isCounterClockwise) {
+            const adjacentFaces = {
+                'front': ['top', 'right', 'bottom', 'left'],
+                'back': ['top', 'left', 'bottom', 'right'],
+                'left': ['top', 'front', 'bottom', 'back'],
+                'right': ['top', 'back', 'bottom', 'front'],
+                'top': ['back', 'right', 'front', 'left'],
+                'bottom': ['front', 'right', 'back', 'left']
+            };
+
+            const indices = {
+                'front': [[6, 7, 8], [0, 3, 6], [2, 1, 0], [8, 5, 2]],
+                'back': [[2, 1, 0], [0, 3, 6], [6, 7, 8], [8, 5, 2]],
+                'left': [[0, 3, 6], [0, 3, 6], [0, 3, 6], [8, 5, 2]],
+                'right': [[8, 5, 2], [0, 3, 6], [8, 5, 2], [8, 5, 2]],
+                'top': [[0, 1, 2], [0, 1, 2], [0, 1, 2], [0, 1, 2]],
+                'bottom': [[6, 7, 8], [6, 7, 8], [6, 7, 8], [6, 7, 8]]
+            };
+
+            const currentAdjacents = adjacentFaces[face];
+            const currentIndices = indices[face];
+
+            const colors = currentAdjacents.map((f, i) =>
+                currentIndices[i].map(idx => document.querySelector(`.${f}`).children[idx].style.background)
+            );
+
+            if (isCounterClockwise) {
+                [colors[0], colors[1], colors[2], colors[3]] = [colors[1], colors[2], colors[3], colors[0]];
+            } else {
+                [colors[0], colors[1], colors[2], colors[3]] = [colors[3], colors[0], colors[1], colors[2]];
+            }
+
+            currentAdjacents.forEach((f, i) => {
+                currentIndices[i].forEach((idx, j) => {
+                    document.querySelector(`.${f}`).children[idx].style.background = colors[i][j];
+                });
+            });
+        }
+    </script>
+</body>
+</html>
