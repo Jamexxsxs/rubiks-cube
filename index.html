@@ -24,9 +24,10 @@
         }
 
         .cube-container {
-            width: 300px;
-            height: 300px;
-            position: relative;
+            width: 80vw;
+            height: 80vw;
+            max-width: 300px;
+            max-height: 300px;
         }
 
         .cube {
@@ -356,6 +357,39 @@
         });
 
         document.addEventListener('mouseleave', () => {
+            isDragging = false;
+        });
+
+        
+        const cubeContainer = document.querySelector('.cube-container');
+
+        cubeContainer.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            const touch = e.touches[0];
+            startX = touch.clientX;
+            startY = touch.clientY;
+        });
+
+
+        cubeContainer.addEventListener('touchmove', (e) => {
+            if (isDragging) {
+                const touch = e.touches[0];
+                const deltaX = touch.clientX - startX;
+                const deltaY = touch.clientY - startY;
+
+                rotateY += deltaX * 0.5;
+                rotateX -= deltaY * 0.5;
+
+                cube.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+
+                startX = touch.clientX;
+                startY = touch.clientY;
+
+                updateCurrentOrientation();
+            }
+        });
+
+        cubeContainer.addEventListener('touchend', () => {
             isDragging = false;
         });
     </script>
