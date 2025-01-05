@@ -63,6 +63,12 @@
             padding: 10px;
             border-radius: 5px;
         }
+
+        @media only screen and (max-width: 768px) {
+            .instructions {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -241,6 +247,41 @@
                 });
             });
         }
+
+        let isDragging = false;
+        let previousMouseX = 0;
+        let previousMouseY = 0;
+
+        document.querySelector('.cube-container').addEventListener('mousedown', (e) => {
+            isDragging = true;
+            previousMouseX = e.clientX;
+            previousMouseY = e.clientY;
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                const deltaX = e.clientX - previousMouseX;
+                const deltaY = e.clientY - previousMouseY;
+
+                rotateY += deltaX * 0.5;
+                rotateX -= deltaY * 0.5;
+
+                cube.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+
+                previousMouseX = e.clientX;
+                previousMouseY = e.clientY;
+
+                updateCurrentOrientation();
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        document.addEventListener('mouseleave', () => {
+            isDragging = false;
+        });
     </script>
 </body>
 </html>
